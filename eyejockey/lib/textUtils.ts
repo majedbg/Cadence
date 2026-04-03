@@ -4,8 +4,8 @@
  *              classification, normalisation, and script merging.
  */
 
-import type { WordToken, WPMRange, DeepgramWord, TranscriptEntry } from './types';
-import { WPM_SLOW_THRESHOLD, WPM_FAST_THRESHOLD } from './constants';
+import type { WordToken, WordState, OffScriptEntry, WPMRange, DeepgramWord, TranscriptEntry, DelaySettings } from './types';
+import { WPM_SLOW_THRESHOLD, WPM_FAST_THRESHOLD, PUNCTUATION_DELAYS, MAX_PUNCTUATION_DELAY } from './constants';
 
 /**
  * Normalise a word for fuzzy matching: lowercase, strip punctuation.
@@ -14,18 +14,42 @@ export function normalise(word: string): string {
   return word.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+const PUNCT_CHARS = new Set(Object.keys(PUNCTUATION_DELAYS));
+const TRAILING_PUNCT_RE = /[,.\;:\u2014\u2013\u2026?!]+$/;
+
 /**
  * Tokenise a script string into an array of WordToken objects.
+ * Detects trailing punctuation and stores it on each token for delay computation.
  */
 export function tokenise(script: string): WordToken[] {
   return script
     .split(/\s+/)
     .filter((w) => w.length > 0)
-    .map((word, index) => ({
-      index,
-      original: word,
-      normalised: normalise(word),
-    }));
+    .map((word, index) => {
+      const match = word.match(TRAILING_PUNCT_RE);
+      const punctuation: string[] = [];
+      if (match) {
+        for (const ch of match[0]) {
+          if (PUNCT_CHARS.has(ch)) punctuation.push(ch);
+        }
+      }
+      return {
+        index,
+        original: word,
+        normalised: normalise(word),
+        punctuation,
+      };
+    });
+}
+
+/**
+ * Compute the punctuation delay for a token using current delay settings.
+ * Takes the max delay among all trailing punctuation chars, capped at MAX_PUNCTUATION_DELAY.
+ */
+export function computeDelayMs(token: WordToken, settings: DelaySettings): number {
+  if (token.punctuation.length === 0) return 0;
+  const total = Math.max(...token.punctuation.map((p) => settings[p] ?? 0));
+  return Math.min(total, MAX_PUNCTUATION_DELAY);
 }
 
 /**
@@ -99,4 +123,29 @@ export function buildTranscript(
       isOffScript,
     };
   });
+}
+
+/**
+ * Derive a unified transcript from word states and off-script entries,
+ * sorted by timestamp. Used as the single source of truth for TranscriptPanel.
+ */
+export function deriveTranscript(
+  wordStates: WordState[],
+  offScriptEntries: OffScriptEntry[]
+): TranscriptEntry[] {
+  const confirmed: TranscriptEntry[] = wordStates
+    .filter((ws) => ws.status === 'confirmed' && ws.confirmedAt !== null)
+    .map((ws) => ({
+      word: ws.confirmedWith ?? ws.token.original,
+      timestamp: ws.confirmedAt!,
+      isOffScript: false,
+    }));
+
+  const offScript: TranscriptEntry[] = offScriptEntries.map((e) => ({
+    word: e.word,
+    timestamp: e.timestamp,
+    isOffScript: true,
+  }));
+
+  return [...confirmed, ...offScript].sort((a, b) => a.timestamp - b.timestamp);
 }

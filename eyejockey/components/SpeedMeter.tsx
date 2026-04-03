@@ -1,8 +1,8 @@
 /**
  * @file SpeedMeter.tsx
- * @description Fixed top-bar speed indicator. Fill width maps speedRatio (0–2)
- *              to a percentage (1.0 = 50% fill). Color shifts between blue (slow),
- *              green (good), and red (fast) zones.
+ * @description Narrow centered speed indicator bar (~200px). Fill width maps
+ *              speedRatio (0–2) to a percentage. Color shifts between blue (slow),
+ *              green (good), and red (fast).
  */
 'use client';
 
@@ -22,8 +22,14 @@ export default function SpeedMeter({ speedRatio }: SpeedMeterProps) {
 
   return (
     <div
-      className="fixed top-0 left-0 z-50 w-full"
-      style={{ height: '10px', backgroundColor: 'rgba(255,255,255,0.03)' }}
+      className="fixed top-0 left-1/2 z-50"
+      style={{
+        transform: 'translateX(-50%)',
+        width: '200px',
+        height: '4px',
+        backgroundColor: 'rgba(255,255,255,0.06)',
+        borderRadius: '2px',
+      }}
       role="meter"
       aria-valuenow={speedRatio}
       aria-valuemin={0}
@@ -35,6 +41,7 @@ export default function SpeedMeter({ speedRatio }: SpeedMeterProps) {
           height: '100%',
           width: `${clampedWidth}%`,
           backgroundColor: color,
+          borderRadius: '2px',
           transition: 'width 300ms ease, background-color 400ms ease',
         }}
       />

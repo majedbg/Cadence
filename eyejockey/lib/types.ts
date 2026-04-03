@@ -17,6 +17,30 @@ export interface WordToken {
   original: string;
   /** Lowercase, stripped version used for fuzzy matching. */
   normalised: string;
+  /** Trailing punctuation characters detected on this word (e.g. [','] or ['.', '!']). */
+  punctuation: string[];
+}
+
+/** User-adjustable punctuation delay values keyed by punctuation character. */
+export type DelaySettings = Record<string, number>;
+
+/** Per-word lifecycle status in the RSVP engine. */
+export type WordStatus = 'planned' | 'displayed' | 'confirmed' | 'unconfirmed';
+
+/** Per-word state — the single source of truth for each script word. */
+export interface WordState {
+  token: WordToken;
+  status: WordStatus;
+  displayedAt: number | null;   // performance.now() when rAF first displayed this word
+  confirmedAt: number | null;   // performance.now() when Deepgram confirmed this word
+  confirmedWith: string | null; // the Deepgram word that matched
+}
+
+/** An off-script word spoken by the user (not in the script token array). */
+export interface OffScriptEntry {
+  word: string;
+  timestamp: number;
+  afterTokenIndex: number; // the confirmed index at the time this was spoken
 }
 
 /** A single entry in the live transcript feed. */
@@ -37,12 +61,16 @@ export interface DeepgramWord {
 /** State returned by the useRSVP hook. */
 export interface RSVPState {
   currentWord: string;
-  currentIndex: number;
+  displayIndex: number;
+  confirmedIndex: number;
   runway: string[];
   status: RSVPStatus;
   speedRatio: number;
   tokens: WordToken[];
+  wordStates: WordState[];
   transcript: TranscriptEntry[];
+  delayProgress: number | null;
+  isDrifting: boolean;
 }
 
 /** State returned by the useDeepgram hook. */

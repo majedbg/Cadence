@@ -1,20 +1,91 @@
 /**
  * @file ScriptPanel.tsx
- * @description Displays the original script as flowing text with the current
- *              word highlighted. Past words dim, future words are semi-bright.
- *              Auto-scrolls to keep the current word centered in view.
+ * @description Displays the original script as flowing text with per-word state
+ *              coloring. Past confirmed words are bright, unconfirmed words are
+ *              amber, and future planned words are dim. The current display
+ *              position gets a highlight background and auto-scrolls into view.
  */
 'use client';
 
-import { useEffect, useRef } from 'react';
-import type { WordToken } from '@/lib/types';
+import React, { useEffect, useRef } from 'react';
+import type { WordState } from '@/lib/types';
 
-interface ScriptPanelProps {
-  tokens: WordToken[];
-  currentIndex: number;
+/* ------------------------------------------------------------------ */
+/*  Memoised per-word span                                            */
+/* ------------------------------------------------------------------ */
+
+interface WordSpanProps {
+  wordState: WordState;
+  isCurrent: boolean;
 }
 
-export default function ScriptPanel({ tokens, currentIndex }: ScriptPanelProps) {
+const WordSpan = React.memo(
+  function WordSpan({ wordState, isCurrent }: WordSpanProps) {
+    const { status, token } = wordState;
+
+    let color: string;
+    let opacity: number;
+    let backgroundColor: string;
+
+    switch (status) {
+      case 'confirmed':
+        color = '#ffffff';
+        opacity = 1;
+        backgroundColor = 'transparent';
+        break;
+      case 'displayed':
+        color = '#ffffff';
+        opacity = 1;
+        backgroundColor = 'rgba(255,255,255,0.08)';
+        break;
+      case 'unconfirmed':
+        color = '#F59E0B';
+        opacity = 0.5;
+        backgroundColor = 'transparent';
+        break;
+      case 'planned':
+      default:
+        color = '#ffffff';
+        opacity = 0.4;
+        backgroundColor = 'transparent';
+        break;
+    }
+
+    // The word at displayIndex gets the special "current" highlight
+    if (isCurrent) {
+      backgroundColor = 'rgba(255,255,255,0.08)';
+    }
+
+    return (
+      <span
+        className="inline-block rounded px-1"
+        data-current={isCurrent || undefined}
+        style={{
+          opacity,
+          color,
+          backgroundColor,
+          transition: 'opacity 150ms ease, background-color 150ms ease',
+        }}
+      >
+        {token.original}
+      </span>
+    );
+  },
+  (prev, next) =>
+    prev.wordState.status === next.wordState.status &&
+    prev.isCurrent === next.isCurrent,
+);
+
+/* ------------------------------------------------------------------ */
+/*  ScriptPanel                                                       */
+/* ------------------------------------------------------------------ */
+
+interface ScriptPanelProps {
+  wordStates: WordState[];
+  displayIndex: number;
+}
+
+export default function ScriptPanel({ wordStates, displayIndex }: ScriptPanelProps) {
   const currentWordRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
@@ -24,7 +95,7 @@ export default function ScriptPanel({ tokens, currentIndex }: ScriptPanelProps) 
         block: 'center',
       });
     }
-  }, [currentIndex]);
+  }, [displayIndex]);
 
   return (
     <div
@@ -38,30 +109,11 @@ export default function ScriptPanel({ tokens, currentIndex }: ScriptPanelProps) 
         Original Script
       </p>
       <div className="leading-relaxed text-base flex flex-wrap gap-x-1.5 gap-y-1">
-        {tokens.map((token) => {
-          const isCurrent = token.index === currentIndex;
-          const isPast = token.index < currentIndex;
-
-          let opacity: number;
-          if (isCurrent) opacity = 1;
-          else if (isPast) opacity = 0.3;
-          else opacity = 0.6;
-
+        {wordStates.map((ws) => {
+          const isCurrent = ws.token.index === displayIndex;
           return (
-            <span
-              key={token.index}
-              ref={isCurrent ? currentWordRef : undefined}
-              className="inline-block rounded px-1"
-              style={{
-                opacity,
-                color: '#ffffff',
-                backgroundColor: isCurrent
-                  ? 'rgba(255,255,255,0.08)'
-                  : 'transparent',
-                transition: 'opacity 150ms ease, background-color 150ms ease',
-              }}
-            >
-              {token.original}
+            <span key={ws.token.index} ref={isCurrent ? currentWordRef : undefined}>
+              <WordSpan wordState={ws} isCurrent={isCurrent} />
             </span>
           );
         })}

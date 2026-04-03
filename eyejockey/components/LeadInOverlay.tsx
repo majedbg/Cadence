@@ -1,8 +1,8 @@
 /**
  * @file LeadInOverlay.tsx
- * @description Full-screen countdown overlay (3, 2, 1) before recording starts.
- *              Uses CSS keyframe animation for fade in/out per digit.
- *              Returns null when countdownValue is null.
+ * @description Countdown overlay (3, 2, 1) before recording starts.
+ *              Positioned below the RSVP word area so the first word remains
+ *              visible during the countdown — users can see what they'll read.
  */
 'use client';
 
@@ -15,8 +15,8 @@ export default function LeadInOverlay({ countdownValue }: LeadInOverlayProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center"
-      style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
+      className="fixed left-0 right-0 flex items-center justify-center z-[100] pointer-events-none"
+      style={{ top: '30vh' }}
     >
       <style>{`
         @keyframes countdownPulse {
@@ -28,10 +28,10 @@ export default function LeadInOverlay({ countdownValue }: LeadInOverlayProps) {
       `}</style>
       <span
         key={countdownValue}
-        className="text-white"
         style={{
-          fontSize: '128px',
+          fontSize: '96px',
           fontWeight: 700,
+          color: 'rgba(255,255,255,0.3)',
           animation: 'countdownPulse 900ms ease-in-out forwards',
         }}
       >

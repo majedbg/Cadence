@@ -48,3 +48,10 @@ The pros and cons work in favor of Deepgram:
 above: 2:58pm to 3:15pm (minute 42 to 70). Includes a chat with claude on browser to come up with a good markdown to feed claude code
 3:15-3:25, reading markdown and reviewing all is ready for agentic code generation
 3:25pm (minute 68+) : generating
+3:40pm (minute 84): generating complete, testing (issue w/ websocket: configured for raw PCM (linear 16) but media recorder sends audioWebm;codecs/opus)
+3:50pm (minute 94): adding punctuation delays feature, details in markdown on mapping punctuation to delays according to best practices (ie 'period' is 400ms, question mark is 450ms)
+4:12pm (minute 116): fixing WPM display issues, polishing calibration page for better ux (ie timer visible, api connection visible, text recorded visible, word count etc)
+4:26pm (minute 129): done fixing calibration / wpm indicator. currently fixing main teleprompter to make it work as intended. make each 'take' spawn a card, and make the transcript visible + audio recording available for download.
+4:36pm (minute 139): introduced 'takes', with audio and transcript in card view. Working on fixing RSVP system because it is waiting for websocket data before it begins scrolling (lags from the get go)
+4:47pm (minute 150): Plan mode: new state managmenet architecture. Creating a singleton source of truth architecture so that the speech api, transcript, and teleprompter track what words are planned, confirmed spoken, offscript, etc... needed for better off-scripting capability + stopping the teleprompter from proceeding if there is confirmation the user did a long pause with speech for any reason.
+5:14pm (minute 178): working well, one last fix!

@@ -9,10 +9,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { DeepgramWord } from '@/lib/types';
 
+export type DGConnectionState = 'idle' | 'connecting' | 'connected' | 'error';
+
 interface UseDeepgramReturn {
   finalWords: DeepgramWord[];
   interimTranscript: string;
   isConnected: boolean;
+  connectionState: DGConnectionState;
   error: string | null;
   start: (stream: MediaStream) => void;
   stop: () => void;
@@ -22,6 +25,7 @@ export function useDeepgram(): UseDeepgramReturn {
   const [finalWords, setFinalWords] = useState<DeepgramWord[]>([]);
   const [interimTranscript, setInterimTranscript] = useState('');
   const [isConnected, setIsConnected] = useState(false);
+  const [connectionState, setConnectionState] = useState<DGConnectionState>('idle');
   const [error, setError] = useState<string | null>(null);
 
   const socketRef = useRef<WebSocket | null>(null);
@@ -40,6 +44,7 @@ export function useDeepgram(): UseDeepgramReturn {
       socketRef.current = null;
     }
     setIsConnected(false);
+    setConnectionState('idle');
   }, []);
 
   const start = useCallback(
@@ -48,6 +53,7 @@ export function useDeepgram(): UseDeepgramReturn {
       setFinalWords([]);
       setInterimTranscript('');
       setError(null);
+      setConnectionState('connecting');
 
       // Fetch API key from our server route
       fetch('/api/deepgram-token')
@@ -55,6 +61,7 @@ export function useDeepgram(): UseDeepgramReturn {
         .then((data: { key?: string; error?: string }) => {
           if (data.error || !data.key) {
             setError(data.error ?? 'Failed to get Deepgram key');
+            setConnectionState('error');
             return;
           }
 
@@ -65,15 +72,14 @@ export function useDeepgram(): UseDeepgramReturn {
             'smart_format=true&' +
             'interim_results=true&' +
             'utterance_end_ms=1000&' +
-            'vad_events=true&' +
-            'encoding=linear16&' +
-            'sample_rate=16000';
+            'vad_events=true';
 
           const ws = new WebSocket(wsUrl, ['token', data.key]);
           socketRef.current = ws;
 
           ws.onopen = () => {
             setIsConnected(true);
+            setConnectionState('connected');
 
             // Start sending audio via MediaRecorder
             const mediaRecorder = new MediaRecorder(stream, {
@@ -117,14 +123,17 @@ export function useDeepgram(): UseDeepgramReturn {
           ws.onerror = () => {
             setError('WebSocket connection error');
             setIsConnected(false);
+            setConnectionState('error');
           };
 
           ws.onclose = () => {
             setIsConnected(false);
+            setConnectionState((prev) => prev === 'error' ? prev : 'idle');
           };
         })
         .catch((err: Error) => {
           setError(err.message);
+          setConnectionState('error');
         });
     },
     []
@@ -147,5 +156,5 @@ export function useDeepgram(): UseDeepgramReturn {
     };
   }, []);
 
-  return { finalWords, interimTranscript, isConnected, error, start, stop };
+  return { finalWords, interimTranscript, isConnected, connectionState, error, start, stop };
 }

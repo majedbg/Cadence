@@ -25,11 +25,8 @@ export function useMediaRecorder(): UseMediaRecorderReturn {
   const chunksRef = useRef<Blob[]>([]);
 
   const startRecording = useCallback(async () => {
-    // Clean up previous URL
-    if (audioURL) {
-      URL.revokeObjectURL(audioURL);
-      setAudioURL(null);
-    }
+    // Don't revoke previous audioURL — it may still be referenced by saved takes.
+    setAudioURL(null);
     chunksRef.current = [];
 
     const mediaStream = await navigator.mediaDevices.getUserMedia({
