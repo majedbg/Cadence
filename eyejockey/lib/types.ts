@@ -86,9 +86,11 @@ export interface DeepgramState {
 /** State returned by the useMediaRecorder hook. */
 export interface MediaRecorderState {
   isRecording: boolean;
-  audioURL: string | null;
+  mediaURL: string | null;
+  hasVideo: boolean;
   stream: MediaStream | null;
-  startRecording: () => Promise<void>;
+  initStream: (options?: { video?: boolean }) => Promise<MediaStream>;
+  startRecording: (options?: { video?: boolean }) => Promise<void>;
   stopRecording: () => void;
 }
 

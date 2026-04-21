@@ -1,7 +1,9 @@
 /**
  * @file TakeCard.tsx
  * @description Expandable card for a completed recording take. Shows take number,
- *              and expands to reveal transcript text, audio player, and download button.
+ *              and expands to reveal transcript text, a playback surface
+ *              (video if the take includes a camera track, audio otherwise),
+ *              and a download button.
  */
 "use client";
 
@@ -11,7 +13,8 @@ import type { TranscriptEntry } from "@/lib/types";
 interface TakeCardProps {
   takeNumber: number;
   transcript: TranscriptEntry[];
-  audioURL: string;
+  mediaURL: string;
+  hasVideo: boolean;
   /** Whether this card starts expanded (latest take auto-expands) */
   defaultExpanded?: boolean;
 }
@@ -19,19 +22,22 @@ interface TakeCardProps {
 export default function TakeCard({
   takeNumber,
   transcript,
-  audioURL,
+  mediaURL,
+  hasVideo,
   defaultExpanded = false,
 }: TakeCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
+  const downloadName = `take-${takeNumber}.webm`;
+
   const handleDownload = useCallback(() => {
     const a = document.createElement("a");
-    a.href = audioURL;
-    a.download = `take-${takeNumber}.webm`;
+    a.href = mediaURL;
+    a.download = downloadName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  }, [audioURL, takeNumber]);
+  }, [mediaURL, downloadName]);
 
   const wordCount = transcript.length;
   const offScriptCount = transcript.filter((t) => t.isOffScript).length;
@@ -124,8 +130,22 @@ export default function TakeCard({
             )}
           </div>
 
-          {/* Audio player */}
-          <audio controls src={audioURL} className="w-full mb-3" />
+          {/* Playback surface — video element when a camera track was
+              recorded, audio element otherwise. */}
+          {hasVideo ? (
+            <video
+              controls
+              src={mediaURL}
+              className="w-full mb-3 rounded-lg"
+              style={{
+                backgroundColor: "#050505",
+                maxHeight: "280px",
+                aspectRatio: "16 / 9",
+              }}
+            />
+          ) : (
+            <audio controls src={mediaURL} className="w-full mb-3" />
+          )}
 
           {/* Download button */}
           <button
@@ -150,7 +170,7 @@ export default function TakeCard({
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            Download take-{takeNumber}.webm
+            Download {downloadName}
           </button>
         </div>
       </div>

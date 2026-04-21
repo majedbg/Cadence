@@ -29,11 +29,13 @@ import LeadInOverlay from "@/components/LeadInOverlay";
 import SettingsPopper from "@/components/SettingsPopper";
 import ConnectionStatus from "@/components/ConnectionStatus";
 import TakeCard from "@/components/TakeCard";
+import VideoPreview from "@/components/VideoPreview";
 
 interface Take {
   number: number;
   transcript: TranscriptEntry[];
-  audioURL: string;
+  mediaURL: string;
+  hasVideo: boolean;
 }
 
 export default function SessionPage() {
@@ -64,8 +66,22 @@ export default function SessionPage() {
     stop: stopDeepgram,
   } = useDeepgram();
 
-  const { isRecording, audioURL, stream, startRecording, stopRecording } =
-    useMediaRecorder();
+  const {
+    isRecording,
+    mediaURL,
+    hasVideo,
+    stream,
+    initStream,
+    startRecording,
+    stopRecording,
+  } = useMediaRecorder();
+
+  // Acquire camera + mic on mount so the user can frame themselves before
+  // hitting Record. Swallow errors — the UI shows the missing-preview state
+  // implicitly (no preview dock renders until a stream arrives).
+  useEffect(() => {
+    initStream({ video: true }).catch(() => {});
+  }, [initStream]);
 
   const {
     currentWord,
@@ -98,29 +114,29 @@ export default function SessionPage() {
     }
   }, [isRecording, stream, startDeepgram]);
 
-  // Save take when recording finishes and audioURL is ready
+  // Save take when recording finishes and the media blob is ready
   useEffect(() => {
-    if (sessionDone && audioURL) {
-      // Only add if we haven't already saved this URL
+    if (sessionDone && mediaURL) {
       setTakes((prev) => {
-        const alreadySaved = prev.some((t) => t.audioURL === audioURL);
+        const alreadySaved = prev.some((t) => t.mediaURL === mediaURL);
         if (alreadySaved) return prev;
         return [
           ...prev,
           {
             number: prev.length + 1,
             transcript: [...transcript],
-            audioURL,
+            mediaURL,
+            hasVideo,
           },
         ];
       });
     }
-  }, [sessionDone, audioURL, transcript]);
+  }, [sessionDone, mediaURL, hasVideo, transcript]);
 
   const handleRecord = useCallback(() => {
     setSessionDone(false);
     startLeadIn(async () => {
-      await startRecording();
+      await startRecording({ video: true });
     });
   }, [startLeadIn, startRecording]);
 
@@ -183,6 +199,14 @@ export default function SessionPage() {
         />
       </div>
 
+      {/* Live camera preview — maximised pre-record so the user can frame
+          themselves, minimised once a take starts so the RSVP owns focus. */}
+      <VideoPreview
+        stream={stream}
+        minimized={isRecording}
+        yieldToRsvp={status === "offscript"}
+      />
+
       {/* RSVP display */}
       <RSVPDisplay
         word={currentWord}
@@ -193,8 +217,10 @@ export default function SessionPage() {
         isDrifting={isDrifting}
       />
 
-      {/* Bottom half: script panel + right panel (transcript or takes) */}
-      <div className="flex-1 flex mt-[15vh] px-6 pb-24 gap-4 min-h-0">
+      {/* Bottom half: script panel + right panel (transcript or takes).
+          Top offset scales with viewport so the RSVP zone gets real breathing
+          room on taller screens without starving the script panel on shorter ones. */}
+      <div className="flex-1 flex mt-[clamp(18vh,22vh,28vh)] px-6 pb-24 gap-4 min-h-0">
         {/* Left: Script panel with blue glow during recording */}
         <div
           className="flex-1 min-h-0 rounded-xl"
@@ -231,7 +257,8 @@ export default function SessionPage() {
                   key={take.number}
                   takeNumber={take.number}
                   transcript={take.transcript}
-                  audioURL={take.audioURL}
+                  mediaURL={take.mediaURL}
+                  hasVideo={take.hasVideo}
                   defaultExpanded={take.number === takes.length}
                 />
               ))}

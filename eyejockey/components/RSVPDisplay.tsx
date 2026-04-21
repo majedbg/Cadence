@@ -84,11 +84,26 @@ export default function RSVPDisplay({
       className="fixed left-0 right-0 flex flex-col items-center justify-center"
       style={{ top: '20px' }}
     >
-      {/* Runway words shown during off-script (stacked vertically to reduce saccades) */}
+      {/* Main RSVP word — always rendered first so it's the top-most (and brightest) item. */}
+      <span
+        style={{
+          fontSize: '64px',
+          fontWeight: 600,
+          letterSpacing: '-0.01em',
+          color: isOffScript ? '#F59E0B' : '#ffffff',
+          opacity: isOffScript ? 0.85 : showDrifting ? 0.4 : 1,
+          transition: 'opacity 200ms ease',
+          animation: showDrifting ? 'rsvp-drift-pulse 1.5s ease-in-out infinite' : 'none',
+        }}
+      >
+        {word}
+      </span>
+
+      {/* Runway words shown during off-script (stacked vertically BELOW the main word,
+          fading as they recede — matches the synced branch's current-then-next reading order). */}
       {isOffScript && runway.length > 0 && (
         <div
-          className="flex flex-col items-center gap-0.5 mb-3"
-          style={{ transform: 'translateY(-4px)' }}
+          className="flex flex-col items-center gap-0.5 mt-1"
         >
           {runway.map((rw, i) => (
             <span
@@ -105,21 +120,6 @@ export default function RSVPDisplay({
           ))}
         </div>
       )}
-
-      {/* Main RSVP word */}
-      <span
-        style={{
-          fontSize: '64px',
-          fontWeight: 600,
-          letterSpacing: '-0.01em',
-          color: isOffScript ? '#F59E0B' : '#ffffff',
-          opacity: isOffScript ? 0.2 : showDrifting ? 0.4 : 1,
-          transition: 'opacity 200ms ease',
-          animation: showDrifting ? 'rsvp-drift-pulse 1.5s ease-in-out infinite' : 'none',
-        }}
-      >
-        {word}
-      </span>
 
       {/* Next word preview — tightly beneath main word, minimal eye movement */}
       {!isOffScript && nextWord && (
