@@ -162,7 +162,7 @@ export default function HeroDemo() {
             width: 6,
             height: 6,
             borderRadius: 999,
-            backgroundColor: "rgba(255,255,255,0.5)",
+            backgroundColor: "rgba(229,134,58,0.8)",
             boxShadow: "0 0 6px rgba(255,255,255,0.35)",
           }}
         />
@@ -176,7 +176,7 @@ export default function HeroDemo() {
       </div>
 
       {/* Camera + RSVP zone */}
-      <div className="flex flex-col items-center pt-6 pb-5 px-6">
+      <div className="flex flex-col items-center pt-2 pb-5 px-6">
         {/* RSVP word directly below the camera — mirrors the real session's
             "word near the lens" promise. */}
         <div className="flex flex-col items-center mt-2 min-h-[96px]">
