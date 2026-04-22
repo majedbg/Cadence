@@ -10,6 +10,7 @@
 
 import { useRouter } from 'next/navigation';
 import Wordmark from '@/components/Wordmark';
+import HeroDemo from '@/components/HeroDemo';
 
 export default function Landing() {
   const router = useRouter();
@@ -54,15 +55,9 @@ export default function Landing() {
           </span>
         </h1>
 
-        <p
-          className="text-lg md:text-xl leading-relaxed max-w-xl mb-10"
-          style={{ color: 'rgba(255,255,255,0.6)' }}
-        >
-          Cadence is a browser teleprompter that flashes one word at a time at
-          a fixed point near your camera, keeping your gaze locked on the lens.
-          It listens as you speak and stays in sync with your natural pace, so
-          the delivery never feels read.
-        </p>
+        <div className="w-full mb-10">
+          <HeroDemo />
+        </div>
 
         <button
           onClick={() => router.push('/script')}
