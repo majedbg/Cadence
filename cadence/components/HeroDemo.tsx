@@ -326,8 +326,8 @@ function MockCamera() {
     <div
       className="relative overflow-hidden"
       style={{
-        width: "100%",
-        maxWidth: 420,
+        width: "70%",
+        maxWidth: 294,
         aspectRatio: "16 / 9",
         borderRadius: 14,
         border: "1px solid rgba(255,255,255,0.08)",
