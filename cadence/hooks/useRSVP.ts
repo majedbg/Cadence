@@ -236,7 +236,7 @@ export function useRSVP({
 
       if (
         gap > effectiveThreshold ||
-        (gap > 2 && silence > SILENCE_TIMEOUT_MS)
+        (gap > 4 && silence > SILENCE_TIMEOUT_MS)
       ) {
         // Mark displayed-but-unconfirmed words
         const ws = wordStatesRef.current;

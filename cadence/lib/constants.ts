@@ -78,8 +78,9 @@ export const RESYNC_MATCH_THRESHOLD = 3;
 
 /** Max words the display can advance beyond confirmed before triggering rewind.
  *  Deepgram's is_final batches lag 1-3s behind speech. At 140 WPM (~2.3 words/sec),
- *  15 words = ~6.5s grace — enough for normal Deepgram latency without false rewinds. */
-export const DRIFT_THRESHOLD = 15;
+ *  10 words = ~4.3s grace — covers normal Deepgram latency while still catching
+ *  off-script drift quickly. */
+export const DRIFT_THRESHOLD = 10;
 
 /** Milliseconds of silence (no new Deepgram words) before triggering rewind.
  *  Must exceed Deepgram's normal batch gap (1-2s). 4s means genuine silence. */
