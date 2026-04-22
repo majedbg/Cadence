@@ -18,7 +18,7 @@ export default function Landing() {
 
   return (
     <div
-      className="min-h-screen flex flex-col px-6 py-8"
+      className="min-h-screen flex flex-col px-6 py-5"
       style={{ backgroundColor: "#0d0f0c", color: "#ffffff" }}
     >
       <div className="z-40">
