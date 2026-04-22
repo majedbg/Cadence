@@ -57,8 +57,10 @@ export default function Landing() {
       </div>
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
-        {/* <HeroHeadline size="hero" className="mb-6" /> */}
-
+        <HeroHeadline size="hero" className="mb-6" />
+        {/* Pair of blinking CSS-only "eyes" that punctuate the headline.
+            Visual nod to the "Eyes on lens" half of the lockup. */}
+        <div className="hero-demo-eyes mt-3" aria-hidden="true" />
         <div className="w-full mb-10">
           <HeroDemo />
         </div>

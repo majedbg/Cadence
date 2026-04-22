@@ -132,11 +132,11 @@ export default function HeroDemo() {
           hero, shown at reduced size so the demo card reads as a titled
           preview rather than a naked screenshot. */}
       <div
-        className="px-6 pt-6 pb-4"
+        className="flex flex-col items-center px-6 pt-6 pb-4"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
       >
-        <HeroHeadline size="compact" />
-      </div>
+        {/* <HeroHeadline size="compact" /> */}
+        
 
       {/* Chrome strip — mimics the session screen's top-bar vocabulary */}
       <div
@@ -156,7 +156,7 @@ export default function HeroDemo() {
               boxShadow: "0 0 6px rgba(136,204,77,0.7)",
             }}
           />
-          Live preview
+          Preview (pretend this is a laptop screen)
         </div>
         <div className="flex items-center gap-3">
           <span>{DEMO_WPM} WPM</span>
@@ -164,7 +164,6 @@ export default function HeroDemo() {
             className="inline-block w-px h-3"
             style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
           />
-          <span style={{ color: "rgba(229,134,58,0.85)" }}>RSVP</span>
         </div>
       </div>
 
@@ -278,6 +277,32 @@ export default function HeroDemo() {
         @keyframes hero-rsvp-in {
           0% { opacity: 0.25; transform: translateY(-2px); }
           100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pair of CSS-only blinking eyes rendered via two pseudo-elements.
+           The white disc is the sclera, the inner radial-gradient dot is
+           the pupil, and the top linear gradient animates its size from
+           40% → 120% → 40% to simulate a blink (the "eyelid"). */
+        .hero-demo-eyes {
+          display: inline-flex;
+          gap: 10px;
+        }
+        .hero-demo-eyes::before,
+        .hero-demo-eyes::after {
+          content: "";
+          height: 20px;
+          aspect-ratio: 1;
+          border-radius: 50%;
+          background:
+            linear-gradient(#222 0 0) top / 100% 40% no-repeat,
+            radial-gradient(farthest-side, #000 95%, transparent) 50% / 8px 8px no-repeat
+            #fff;
+          animation: hero-demo-blink 1.5s infinite alternate ease-in;
+        }
+        @keyframes hero-demo-blink {
+          0%, 70% { background-size: 100% 40%, 8px 8px; }
+          85%     { background-size: 100% 120%, 8px 8px; }
+          100%    { background-size: 100% 40%, 8px 8px; }
         }
       `}</style>
     </div>
