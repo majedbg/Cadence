@@ -17,16 +17,16 @@
  *     flushed every 100ms (same cadence as the real engine) to keep the
  *     hero cheap on lower-powered laptops previewing the page.
  */
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { tokenise, computeDelayMs } from '@/lib/textUtils';
-import { PUNCTUATION_DELAYS } from '@/lib/constants';
+import { useEffect, useRef, useState } from "react";
+import { tokenise, computeDelayMs } from "@/lib/textUtils";
+import { PUNCTUATION_DELAYS } from "@/lib/constants";
 
 const DEMO_SCRIPT =
-  'Cadence is a browser teleprompter that flashes one word at a time at a fixed point near your camera, keeping your gaze locked on the lens. It listens as you speak and stays in sync with your natural pace, so the delivery never feels read.';
+  "Cadence is a browser teleprompter that flashes one word at a time at a fixed point near your camera, keeping your gaze locked on the lens. It listens as you speak and stays in sync with your natural pace, so the delivery never feels read.";
 
-const DEMO_WPM = 140;
+const DEMO_WPM = 165;
 const LOOP_PAUSE_MS = 1800;
 const FLUSH_INTERVAL_MS = 100;
 
@@ -58,7 +58,10 @@ export default function HeroDemo() {
       }
 
       if (delayRemainingRef.current > 0) {
-        delayRemainingRef.current = Math.max(0, delayRemainingRef.current - delta);
+        delayRemainingRef.current = Math.max(
+          0,
+          delayRemainingRef.current - delta
+        );
         rafId = requestAnimationFrame(frame);
         return;
       }
@@ -118,28 +121,28 @@ export default function HeroDemo() {
       className="relative w-full max-w-3xl mx-auto overflow-hidden"
       style={{
         borderRadius: 18,
-        border: '1px solid rgba(255,255,255,0.08)',
-        backgroundColor: 'rgba(255,255,255,0.02)',
+        border: "1px solid rgba(255,255,255,0.08)",
+        backgroundColor: "rgba(255,255,255,0.02)",
         boxShadow:
-          '0 40px 120px -40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset',
+          "0 40px 120px -40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset",
       }}
     >
       {/* Chrome strip — mimics the session screen's top-bar vocabulary */}
       <div
         className="flex items-center justify-between px-4 py-2.5 text-[10px] uppercase tabular-nums"
         style={{
-          letterSpacing: '0.12em',
-          color: 'rgba(255,255,255,0.45)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          backgroundColor: 'rgba(255,255,255,0.015)',
+          letterSpacing: "0.12em",
+          color: "rgba(255,255,255,0.45)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          backgroundColor: "rgba(255,255,255,0.015)",
         }}
       >
         <div className="flex items-center gap-2">
           <span
             className="inline-block w-1.5 h-1.5 rounded-full"
             style={{
-              backgroundColor: '#88CC4D',
-              boxShadow: '0 0 6px rgba(136,204,77,0.7)',
+              backgroundColor: "#88CC4D",
+              boxShadow: "0 0 6px rgba(136,204,77,0.7)",
             }}
           />
           Live preview
@@ -148,38 +151,36 @@ export default function HeroDemo() {
           <span>{DEMO_WPM} WPM</span>
           <span
             className="inline-block w-px h-3"
-            style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+            style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
           />
-          <span style={{ color: 'rgba(229,134,58,0.85)' }}>RSVP</span>
+          <span style={{ color: "rgba(229,134,58,0.85)" }}>RSVP</span>
         </div>
       </div>
 
       {/* Camera + RSVP zone */}
       <div className="flex flex-col items-center pt-6 pb-5 px-6">
-        <MockCamera />
-
         {/* RSVP word directly below the camera — mirrors the real session's
             "word near the lens" promise. */}
         <div className="flex flex-col items-center mt-5 min-h-[96px]">
           <span
             key={`w-${displayIndex}`}
             style={{
-              fontSize: 'clamp(2rem, 5vw, 3.25rem)',
+              fontSize: "clamp(2rem, 5vw, 3.25rem)",
               fontWeight: 600,
-              letterSpacing: '-0.01em',
-              color: '#ffffff',
+              letterSpacing: "-0.01em",
+              color: "#ffffff",
               lineHeight: 1,
-              animation: 'hero-rsvp-in 160ms ease-out',
+              animation: "hero-rsvp-in 160ms ease-out",
             }}
           >
-            {currentToken?.original ?? ''}
+            {currentToken?.original ?? ""}
           </span>
           {nextToken && (
             <span
               style={{
-                fontSize: 'clamp(1rem, 2.4vw, 1.5rem)',
+                fontSize: "clamp(1rem, 2.4vw, 1.5rem)",
                 fontWeight: 400,
-                color: 'rgba(255,255,255,0.3)',
+                color: "rgba(255,255,255,0.3)",
                 marginTop: 4,
               }}
             >
@@ -192,37 +193,38 @@ export default function HeroDemo() {
               width: 64,
               height: 2,
               borderRadius: 999,
-              backgroundColor: 'rgba(255,255,255,0.06)',
-              overflow: 'hidden',
+              backgroundColor: "rgba(255,255,255,0.06)",
+              overflow: "hidden",
             }}
           >
             {delayProgress !== null && (
               <div
                 style={{
-                  height: '100%',
+                  height: "100%",
                   width: `${delayProgress * 100}%`,
-                  backgroundColor: 'rgba(229,134,58,0.8)',
-                  transition: 'width 80ms linear',
+                  backgroundColor: "rgba(229,134,58,0.8)",
+                  transition: "width 80ms linear",
                 }}
               />
             )}
           </div>
         </div>
+        <MockCamera />
       </div>
 
       {/* Script panel — flowing text with the current word highlighted */}
       <div
         className="px-6 pb-5 pt-4"
         style={{
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-          backgroundColor: 'rgba(255,255,255,0.015)',
+          borderTop: "1px solid rgba(255,255,255,0.05)",
+          backgroundColor: "rgba(255,255,255,0.015)",
         }}
       >
         <p
           className="text-[10px] uppercase mb-3"
           style={{
-            letterSpacing: '0.14em',
-            color: 'rgba(255,255,255,0.3)',
+            letterSpacing: "0.14em",
+            color: "rgba(255,255,255,0.3)",
           }}
         >
           Original script
@@ -230,8 +232,8 @@ export default function HeroDemo() {
         <p
           className="leading-relaxed text-left"
           style={{
-            fontSize: '15px',
-            color: 'rgba(255,255,255,0.35)',
+            fontSize: "15px",
+            color: "rgba(255,255,255,0.35)",
           }}
         >
           {tokens.map((t, i) => {
@@ -241,19 +243,20 @@ export default function HeroDemo() {
               <span
                 key={t.index}
                 style={{
-                  color: isRead || isCurrent ? '#ffffff' : 'rgba(255,255,255,0.35)',
+                  color:
+                    isRead || isCurrent ? "#ffffff" : "rgba(255,255,255,0.35)",
                   opacity: isRead ? 1 : isCurrent ? 1 : 0.55,
                   backgroundColor: isCurrent
-                    ? 'rgba(255,255,255,0.08)'
-                    : 'transparent',
+                    ? "rgba(255,255,255,0.08)"
+                    : "transparent",
                   borderRadius: 3,
-                  padding: isCurrent ? '0 3px' : '0',
+                  padding: isCurrent ? "0 3px" : "0",
                   transition:
-                    'color 180ms ease, background-color 180ms ease, opacity 180ms ease',
+                    "color 180ms ease, background-color 180ms ease, opacity 180ms ease",
                 }}
               >
                 {t.original}
-                {i < tokens.length - 1 ? ' ' : ''}
+                {i < tokens.length - 1 ? " " : ""}
               </span>
             );
           })}
@@ -279,13 +282,13 @@ function MockCamera() {
     <div
       className="relative overflow-hidden"
       style={{
-        width: '100%',
+        width: "100%",
         maxWidth: 420,
-        aspectRatio: '16 / 9',
+        aspectRatio: "16 / 9",
         borderRadius: 14,
-        border: '1px solid rgba(255,255,255,0.08)',
-        backgroundColor: '#050505',
-        boxShadow: '0 24px 60px -24px rgba(0,0,0,0.8)',
+        border: "1px solid rgba(255,255,255,0.08)",
+        backgroundColor: "#050505",
+        boxShadow: "0 24px 60px -24px rgba(0,0,0,0.8)",
       }}
     >
       {/* Soft studio gradient — implies a subject lit from above-left */}
@@ -293,7 +296,7 @@ function MockCamera() {
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 70% 65% at 45% 35%, rgba(229,134,58,0.10) 0%, rgba(20,18,16,0.9) 55%, #050505 100%)',
+            "radial-gradient(ellipse 70% 65% at 45% 35%, rgba(229,134,58,0.10) 0%, rgba(20,18,16,0.9) 55%, #050505 100%)",
         }}
       />
 
@@ -320,16 +323,16 @@ function MockCamera() {
       {/* Recording badge */}
       <div
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: 8,
           left: 8,
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           gap: 6,
-          padding: '3px 8px 3px 6px',
+          padding: "3px 8px 3px 6px",
           borderRadius: 999,
-          backgroundColor: 'rgba(10,10,10,0.65)',
-          backdropFilter: 'blur(6px)',
+          backgroundColor: "rgba(10,10,10,0.65)",
+          backdropFilter: "blur(6px)",
         }}
       >
         <span
@@ -337,17 +340,17 @@ function MockCamera() {
             width: 6,
             height: 6,
             borderRadius: 999,
-            backgroundColor: '#BF3A27',
-            animation: 'hero-rec-pulse 1.4s ease-in-out infinite',
+            backgroundColor: "#BF3A27",
+            animation: "hero-rec-pulse 1.4s ease-in-out infinite",
           }}
         />
         <span
           style={{
             fontSize: 9,
             fontWeight: 600,
-            letterSpacing: '0.08em',
-            color: 'rgba(255,255,255,0.85)',
-            textTransform: 'uppercase',
+            letterSpacing: "0.08em",
+            color: "rgba(255,255,255,0.85)",
+            textTransform: "uppercase",
           }}
         >
           Rec
@@ -357,15 +360,15 @@ function MockCamera() {
       {/* Lens-aim marker at top-center — suggests "speak into here" */}
       <div
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: 6,
-          left: '50%',
-          transform: 'translateX(-50%)',
+          left: "50%",
+          transform: "translateX(-50%)",
           width: 6,
           height: 6,
           borderRadius: 999,
-          backgroundColor: 'rgba(255,255,255,0.5)',
-          boxShadow: '0 0 6px rgba(255,255,255,0.35)',
+          backgroundColor: "rgba(255,255,255,0.5)",
+          boxShadow: "0 0 6px rgba(255,255,255,0.35)",
         }}
       />
 

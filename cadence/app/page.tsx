@@ -11,20 +11,51 @@
 import { useRouter } from 'next/navigation';
 import Wordmark from '@/components/Wordmark';
 import HeroDemo from '@/components/HeroDemo';
+import EvilEye from '@/components/EvilEye';
 
 export default function Landing() {
   const router = useRouter();
 
   return (
     <div
-      className="min-h-screen flex flex-col px-6 py-8"
+      className="relative min-h-screen flex flex-col px-6 py-8 overflow-hidden"
       style={{ backgroundColor: '#0d0f0c', color: '#ffffff' }}
     >
-      <div className="z-40">
+      {/* Ambient background eye — tracks the cursor from behind all content.
+          Kept very subtle via low opacity + soft blur so the foreground UI
+          remains the primary read. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{ opacity: 0.28, filter: 'blur(0.4px)' }}
+      >
+        <EvilEye
+          eyeColor="#050505"
+          backgroundColor="#0d0f0c"
+          intensity={1.0}
+          pupilSize={0.55}
+          irisWidth={0.3}
+          glowIntensity={0.22}
+          scale={0.6}
+          pupilFollow={1.0}
+        />
+      </div>
+
+      {/* Soft vignette so the content at the edges stays legible over the eye. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 75% 65% at 50% 50%, rgba(13,15,12,0) 0%, rgba(13,15,12,0.35) 55%, rgba(13,15,12,0.85) 100%)',
+        }}
+      />
+
+      <div className="relative z-40">
         <Wordmark tone="bold" />
       </div>
 
-      <main className="flex-1 flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
         <div
           className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs uppercase tracking-[0.18em] mb-8"
           style={{
