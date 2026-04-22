@@ -57,7 +57,7 @@ export default function Landing() {
       </div>
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
-        <HeroHeadline size="hero" className="mb-6" />
+        {/* <HeroHeadline size="hero" className="mb-6" /> */}
 
         <div className="w-full mb-10">
           <HeroDemo />
