@@ -1,0 +1,228 @@
+:root {
+  color-scheme: dark;
+  --bg: #141416;
+  --bg-elevated: #1c1c20;
+  --fg: #f5f5f5;
+  --muted: rgba(245, 245, 245, 0.55);
+  --border: rgba(255, 255, 255, 0.08);
+  --accent: #ff6b00;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ----- Header ----- */
+
+#viewerHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+}
+
+#viewerHeader .left {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.doc-name {
+  font-size: 11px;
+  color: var(--muted);
+  max-width: 60vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#viewerHeader .right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mode-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.mode-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  border-radius: 6px;
+  user-select: none;
+}
+
+.mode-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mode-option:has(input:checked) {
+  background: rgba(255, 107, 0, 0.18);
+  color: var(--fg);
+}
+
+button.primary,
+button {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fg);
+  font: inherit;
+  padding: 6px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #0e0e10;
+  font-weight: 600;
+}
+
+button.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.back-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 12px;
+  padding: 4px 6px;
+}
+
+.back-link:hover { color: var(--fg); }
+
+/* ----- Main / pages ----- */
+
+#viewerMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0 40px;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 20px;
+  text-align: center;
+}
+
+.load-error-title {
+  color: #f5f5f5;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.load-error-detail {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 520px;
+  margin: 0 auto 14px;
+  line-height: 1.5;
+}
+.load-error-fallback {
+  display: inline-block;
+  color: #FF6B00;
+  text-decoration: none;
+  font-size: 13px;
+  border: 1px solid rgba(255, 107, 0, 0.4);
+  padding: 7px 14px;
+  border-radius: 7px;
+}
+.load-error-fallback:hover {
+  background: rgba(255, 107, 0, 0.12);
+}
+
+.pages-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+
+.page-wrapper {
+  position: relative;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.page-wrapper canvas {
+  display: block;
+}
+
+/* PDF.js stock CSS positions .textLayer absolutely over the canvas. */
+.page-wrapper .textLayer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 1;
+  line-height: 1;
+}
+
+/* ----- Flash message ----- */
+
+#flashContainer {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483646;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.flash {
+  background: rgba(20, 20, 22, 0.96);
+  color: #f5f5f5;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  pointer-events: auto;
+}

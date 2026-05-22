@@ -1,0 +1,23 @@
+{
+  "name": "cadence-reader",
+  "version": "0.1.0",
+  "description": "RSVP reader Chrome extension extracted from Cadence — highlight text on any page and read it word-by-word as an overlay.",
+  "private": true,
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "watch": "node esbuild.config.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.270",
+    "esbuild": "^0.24.0",
+    "happy-dom": "^15.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^5.7.284"
+  }
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cadence Reader</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <div class="title">Cadence Reader</div>
+      <div class="subtitle">Select text · then press Start</div>
+    </header>
+
+    <section>
+      <label class="row">
+        <span class="row-label">Speed</span>
+        <span class="row-value"><output id="wpmOut">300</output> wpm</span>
+      </label>
+      <input type="range" id="wpm" min="100" max="700" step="10" value="300" />
+    </section>
+
+    <section>
+      <label class="row">
+        <span class="row-label">Highlight</span>
+        <input type="color" id="color" value="#FF6B00" />
+      </label>
+      <label class="row">
+        <span class="row-label">Opacity</span>
+        <span class="row-value"><output id="opacityOut">0.25</output></span>
+      </label>
+      <input type="range" id="opacity" min="0.05" max="0.6" step="0.05" value="0.25" />
+    </section>
+
+    <section class="actions" id="normalActions">
+      <button id="start" class="primary">Start</button>
+      <button id="stop">Stop</button>
+    </section>
+
+    <section class="actions" id="pdfActions" hidden>
+      <button id="openInViewer" class="primary">Open in Cadence Viewer</button>
+    </section>
+
+    <section class="pdf-pref">
+      <label class="checkbox-row">
+        <input type="checkbox" id="autoOpenPdfs" />
+        <span>Always open PDFs in Cadence</span>
+      </label>
+    </section>
+
+    <footer>
+      <div><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> start · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd> pause</div>
+      <div>In-page: <kbd>Space</kbd> · <kbd>←</kbd>/<kbd>→</kbd> · <kbd>Esc</kbd></div>
+    </footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

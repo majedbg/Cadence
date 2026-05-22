@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cadence Viewer</title>
+    <!-- PDF.js stock text-layer/annotation CSS (required for correct alignment). -->
+    <link rel="stylesheet" href="pdf_viewer.css" />
+    <link rel="stylesheet" href="viewer.css" />
+  </head>
+  <body>
+    <header id="viewerHeader">
+      <div class="left">
+        <div class="title">Cadence Viewer</div>
+        <div id="docName" class="doc-name" title=""></div>
+      </div>
+      <div class="right">
+        <div class="mode-toggle" role="radiogroup" aria-label="Reading mode">
+          <label class="mode-option">
+            <input type="radio" name="mode" value="selection" checked />
+            <span>Read selection</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="mode" value="page" />
+            <span>Read whole page</span>
+          </label>
+        </div>
+        <button id="startBtn" class="primary" disabled>Start</button>
+        <a id="backLink" class="back-link" href="#">Back to default viewer</a>
+      </div>
+    </header>
+
+    <main id="viewerMain">
+      <div id="status" class="status">Loading PDF…</div>
+      <div id="pagesContainer" class="pages-container"></div>
+    </main>
+
+    <div id="flashContainer"></div>
+
+    <script src="viewer.js"></script>
+  </body>
+</html>
