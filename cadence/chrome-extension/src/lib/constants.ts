@@ -6,6 +6,7 @@ export const DEFAULT_SETTINGS: ReaderSettings = {
   highlightOpacity: 0.25,
   showRunway: true,
   autoOpenPdfs: false,
+  wordFadeMs: 60,
 };
 
 export const RUNWAY_LENGTH = 6;

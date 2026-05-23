@@ -1,6 +1,7 @@
 import type { WordToken, RSVPStatus, DelaySettings } from '../lib/types';
 import { PUNCTUATION_DELAYS } from '../lib/constants';
 import { computeDelayMs, computeWordDurations } from '../lib/textUtils';
+import { clampMultiplier } from './speed';
 
 interface RSVPEngineEvents {
   onTick: (state: RSVPTickState) => void;
@@ -26,6 +27,10 @@ export class RSVPEngine {
   private wordDurations: number[] = [];
   private delaySettings: DelaySettings = PUNCTUATION_DELAYS;
   private wpm: number;
+  // Base WPM (last value passed to constructor or setWPM) — the multiplier is
+  // applied on top of this to produce the effective `wpm` used by the loop.
+  private baseWPM: number;
+  private speedMultiplier = 1.0;
 
   private status: RSVPStatus = 'idle';
   private index = 0;
@@ -39,11 +44,15 @@ export class RSVPEngine {
 
   constructor(wpm: number, events: RSVPEngineEvents) {
     this.wpm = wpm;
+    this.baseWPM = wpm;
     this.events = events;
   }
 
   load(tokens: WordToken[]): void {
     this.tokens = tokens;
+    // Each new RSVP session starts at 1.0×.
+    this.speedMultiplier = 1.0;
+    this.wpm = this.baseWPM;
     this.wordDurations = computeWordDurations(tokens, this.wpm);
     this.index = 0;
     this.accumulator = 0;
@@ -54,9 +63,21 @@ export class RSVPEngine {
   }
 
   setWPM(wpm: number): void {
-    this.wpm = wpm;
-    this.wordDurations = computeWordDurations(this.tokens, wpm);
+    this.baseWPM = wpm;
+    this.wpm = wpm * this.speedMultiplier;
+    this.wordDurations = computeWordDurations(this.tokens, this.wpm);
     this.emitTick();
+  }
+
+  setSpeedMultiplier(multiplier: number): void {
+    this.speedMultiplier = clampMultiplier(multiplier);
+    this.wpm = this.baseWPM * this.speedMultiplier;
+    this.wordDurations = computeWordDurations(this.tokens, this.wpm);
+    this.emitTick();
+  }
+
+  getSpeedMultiplier(): number {
+    return this.speedMultiplier;
   }
 
   play(): void {

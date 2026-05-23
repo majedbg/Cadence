@@ -1,9 +1,9 @@
 import { RSVPEngine, type RSVPTickState } from './rsvp';
 import { DOMHighlighter } from './highlighter';
-import { AreaOutline } from './areaOutline';
 import { Overlay } from './overlay';
 import { tokeniseSelection, getActiveSelectionRange } from './selection';
 import { findNextSection } from './nextSection';
+import { stepMultiplier } from './speed';
 import { DEFAULT_SETTINGS, STORAGE_KEY } from '../lib/constants';
 import type { ReaderSettings, WordToken } from '../lib/types';
 
@@ -16,7 +16,6 @@ class CadenceReader {
   private engine: RSVPEngine | null = null;
   private overlay: Overlay | null = null;
   private highlighter: DOMHighlighter | null = null;
-  private areaOutline: AreaOutline | null = null;
   private tokens: WordToken[] = [];
   private currentRange: Range | null = null;
   private settings: ReaderSettings = DEFAULT_SETTINGS;
@@ -69,11 +68,10 @@ class CadenceReader {
       this.highlighter.setColor(this.settings.highlightColor);
       this.highlighter.setOpacity(this.settings.highlightOpacity);
     }
-    if (this.areaOutline) {
-      this.areaOutline.setColor(this.settings.highlightColor);
-      this.areaOutline.setOpacity(this.settings.highlightOpacity);
+    if (this.overlay) {
+      this.overlay.setAccentColor(this.settings.highlightColor);
+      this.overlay.setWordFadeMs(this.settings.wordFadeMs);
     }
-    if (this.overlay) this.overlay.setAccentColor(this.settings.highlightColor);
   }
 
   private startFromSelection(): void {
@@ -101,6 +99,7 @@ class CadenceReader {
     this.lastIndex = -1;
 
     this.overlay = new Overlay(this.settings.highlightColor);
+    this.overlay.setWordFadeMs(this.settings.wordFadeMs);
     this.overlay.setTokens(tokens);
     this.overlay.onClose = () => this.stop();
     this.overlay.onAutoSelectNext = () => this.autoSelectNext();
@@ -110,11 +109,6 @@ class CadenceReader {
       this.settings.highlightColor,
       this.settings.highlightOpacity,
     );
-    this.areaOutline = new AreaOutline(
-      this.settings.highlightColor,
-      this.settings.highlightOpacity,
-    );
-    this.areaOutline.setRange(range);
 
     this.engine = new RSVPEngine(this.settings.wpm, {
       onTick: (state) => this.onTick(state),
@@ -122,6 +116,8 @@ class CadenceReader {
       onDone: () => this.onDone(),
     });
     this.engine.load(tokens);
+    // load() resets the multiplier to 1.0; mirror that in the overlay.
+    this.overlay.setSpeedMultiplier(this.engine.getSpeedMultiplier());
 
     this.attachKeys();
     window.getSelection()?.removeAllRanges();
@@ -136,12 +132,10 @@ class CadenceReader {
     this.engine?.stop();
     this.overlay?.destroy();
     this.highlighter?.destroy();
-    this.areaOutline?.destroy();
     this.detachKeys();
     this.engine = null;
     this.overlay = null;
     this.highlighter = null;
-    this.areaOutline = null;
     this.tokens = [];
     this.currentRange = null;
     this.lastIndex = -1;
@@ -188,6 +182,16 @@ class CadenceReader {
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         this.engine?.step(-1);
+      } else if (e.shiftKey && (e.key === '>' || e.key === '<')) {
+        // YouTube-style speed control: Shift+. → > (faster), Shift+, → < (slower).
+        // `e.key` reports the printable character (`>`/`<`) on US layouts when
+        // shift+period/comma is pressed; on non-US layouts the character may
+        // differ but the modifier+key intent is the same.
+        e.preventDefault();
+        if (!this.engine || !this.overlay) return;
+        const next = stepMultiplier(this.engine.getSpeedMultiplier(), e.key === '>' ? 1 : -1);
+        this.engine.setSpeedMultiplier(next);
+        this.overlay.setSpeedMultiplier(next);
       } else if (e.key === 'Escape') {
         this.stop();
       }

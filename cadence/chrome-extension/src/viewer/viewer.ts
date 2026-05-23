@@ -4,17 +4,17 @@
  * Loads the PDF from `?src=` (cross-origin OK because manifest declares
  * `host_permissions: ["<all_urls>"]`), renders each page's canvas + text
  * layer, then lets the user RSVP either a selected range or the whole
- * document via the same engine/overlay/highlighter/areaOutline stack the
- * content script uses on regular web pages.
+ * document via the same engine/overlay/highlighter stack the content
+ * script uses on regular web pages.
  */
 
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 import { RSVPEngine, type RSVPTickState } from '../content/rsvp';
 import { DOMHighlighter } from '../content/highlighter';
-import { AreaOutline } from '../content/areaOutline';
 import { Overlay } from '../content/overlay';
 import { tokeniseSelection, getActiveSelectionRange } from '../content/selection';
+import { stepMultiplier } from '../content/speed';
 import { DEFAULT_SETTINGS, STORAGE_KEY } from '../lib/constants';
 import { getSourceFromViewerUrl } from '../lib/viewerUrl';
 import { fetchPdfBytes } from './fetchPdf';
@@ -58,7 +58,6 @@ class CadenceViewer {
   private engine: RSVPEngine | null = null;
   private overlay: Overlay | null = null;
   private highlighter: DOMHighlighter | null = null;
-  private areaOutline: AreaOutline | null = null;
   private tokens: WordToken[] = [];
   private keyHandler: ((e: KeyboardEvent) => void) | null = null;
   private lastIndex = -1;
@@ -160,11 +159,10 @@ class CadenceViewer {
       this.highlighter.setColor(this.settings.highlightColor);
       this.highlighter.setOpacity(this.settings.highlightOpacity);
     }
-    if (this.areaOutline) {
-      this.areaOutline.setColor(this.settings.highlightColor);
-      this.areaOutline.setOpacity(this.settings.highlightOpacity);
+    if (this.overlay) {
+      this.overlay.setAccentColor(this.settings.highlightColor);
+      this.overlay.setWordFadeMs(this.settings.wordFadeMs);
     }
-    if (this.overlay) this.overlay.setAccentColor(this.settings.highlightColor);
   }
 
   private setStatus(text: string): void {
@@ -330,6 +328,7 @@ class CadenceViewer {
     this.lastIndex = -1;
 
     this.overlay = new Overlay(this.settings.highlightColor);
+    this.overlay.setWordFadeMs(this.settings.wordFadeMs);
     this.overlay.setTokens(tokens);
     this.overlay.onClose = () => this.stopSession();
     // Auto-next-section doesn't apply inside a fixed PDF viewer surface.
@@ -340,11 +339,6 @@ class CadenceViewer {
       this.settings.highlightColor,
       this.settings.highlightOpacity,
     );
-    this.areaOutline = new AreaOutline(
-      this.settings.highlightColor,
-      this.settings.highlightOpacity,
-    );
-    this.areaOutline.setRange(range);
 
     this.engine = new RSVPEngine(this.settings.wpm, {
       onTick: (state) => this.onTick(state),
@@ -352,6 +346,8 @@ class CadenceViewer {
       onDone: () => this.onDone(),
     });
     this.engine.load(tokens);
+    // load() resets the multiplier to 1.0; mirror that in the overlay.
+    this.overlay.setSpeedMultiplier(this.engine.getSpeedMultiplier());
 
     this.attachKeys();
     window.getSelection()?.removeAllRanges();
@@ -392,12 +388,10 @@ class CadenceViewer {
     this.engine?.stop();
     this.overlay?.destroy();
     this.highlighter?.destroy();
-    this.areaOutline?.destroy();
     this.detachKeys();
     this.engine = null;
     this.overlay = null;
     this.highlighter = null;
-    this.areaOutline = null;
     this.tokens = [];
     this.lastIndex = -1;
   }
@@ -427,6 +421,13 @@ class CadenceViewer {
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         this.engine?.step(-1);
+      } else if (e.shiftKey && (e.key === '>' || e.key === '<')) {
+        // YouTube-style speed control: Shift+. → > (faster), Shift+, → < (slower).
+        e.preventDefault();
+        if (!this.engine || !this.overlay) return;
+        const next = stepMultiplier(this.engine.getSpeedMultiplier(), e.key === '>' ? 1 : -1);
+        this.engine.setSpeedMultiplier(next);
+        this.overlay.setSpeedMultiplier(next);
       } else if (e.key === 'Escape') {
         this.stopSession();
       }

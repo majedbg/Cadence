@@ -17,6 +17,8 @@ const openInViewerBtn = $<HTMLButtonElement>('openInViewer');
 const normalActions = $<HTMLElement>('normalActions');
 const pdfActions = $<HTMLElement>('pdfActions');
 const autoOpenPdfs = $<HTMLInputElement>('autoOpenPdfs');
+const fadeMs = $<HTMLInputElement>('fadeMs');
+const fadeOut = $<HTMLOutputElement>('fadeOut');
 
 async function getSettings(): Promise<ReaderSettings> {
   const stored = await chrome.storage.local.get(STORAGE_KEY);
@@ -73,6 +75,8 @@ function render(s: ReaderSettings): void {
   opacity.value = String(s.highlightOpacity);
   opacityOut.value = s.highlightOpacity.toFixed(2);
   autoOpenPdfs.checked = s.autoOpenPdfs;
+  fadeMs.value = String(s.wordFadeMs);
+  fadeOut.value = String(s.wordFadeMs);
 }
 
 async function pushChange(): Promise<void> {
@@ -82,9 +86,11 @@ async function pushChange(): Promise<void> {
     highlightOpacity: Number(opacity.value),
     showRunway: true,
     autoOpenPdfs: autoOpenPdfs.checked,
+    wordFadeMs: Number(fadeMs.value),
   };
   wpmOut.value = String(next.wpm);
   opacityOut.value = next.highlightOpacity.toFixed(2);
+  fadeOut.value = String(next.wordFadeMs);
   await saveSettings(next);
   await sendToTab({ type: 'updateSettings', settings: next });
 }
@@ -97,6 +103,7 @@ async function pushChange(): Promise<void> {
   color.addEventListener('input', pushChange);
   opacity.addEventListener('input', pushChange);
   autoOpenPdfs.addEventListener('change', pushChange);
+  fadeMs.addEventListener('input', pushChange);
 
   const tab = await activeTab();
   const mode = popupMode(tab?.url);

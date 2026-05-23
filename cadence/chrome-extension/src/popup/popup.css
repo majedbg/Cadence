@@ -33,6 +33,7 @@ section { margin-bottom: 14px; }
 }
 .row-label { color: var(--muted); font-size: 12px; }
 .row-value { font-variant-numeric: tabular-nums; font-size: 12px; }
+.row-hint { color: var(--accent); font-size: 10px; margin-left: 4px; }
 
 input[type="range"] {
   width: 100%;

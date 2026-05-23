@@ -18,4 +18,6 @@ export interface ReaderSettings {
   showRunway: boolean;
   /** When true, the background redirects PDF navigations into the Cadence viewer. */
   autoOpenPdfs: boolean;
+  /** Word cross-fade duration in ms (tuning knob — will be hardcoded later). */
+  wordFadeMs: number;
 }
